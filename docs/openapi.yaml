@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: MetroLens AI Core API
+  version: 2.1.0-ADS
+  description: >
+    REST API for Kochi Metro Rail Limited (KMRL) Cross-Document Operational Intelligence,
+    Recurring Issue Clustering, and Silent Risk Detection. SIH Hackathon Problem SIH25080.
+paths:
+  /api/health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service health status
+  /api/dashboard:
+    get:
+      summary: Operational dashboard KPI aggregations and analytics
+      responses:
+        '200':
+          description: Dashboard metrics payload
+  /api/documents:
+    get:
+      summary: List all ingested documents with filters
+      parameters:
+        - name: station
+          in: query
+          schema:
+            type: string
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Filtered operational documents
+  /api/documents/upload:
+    post:
+      summary: Ingest and auto-extract document entities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, rawText]
+              properties:
+                title:
+                  type: string
+                filename:
+                  type: string
+                rawText:
+                  type: string
+                stationId:
+                  type: string
+                department:
+                  type: string
+      responses:
+        '201':
+          description: Document and extracted schema
+  /api/documents/{id}:
+    get:
+      summary: Get document details and extracted incidents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document details
+  /api/issues/recurring:
+    get:
+      summary: Get all detected cross-document recurring issue clusters
+      responses:
+        '200':
+          description: List of recurring clusters and cosine similarity links
+  /api/issues/{id}/timeline:
+    get:
+      summary: Retrieve chronological incident chain for an asset/cluster
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chronological progression of incidents
+  /api/risks/silent:
+    get:
+      summary: Get weak signal emerging risks
+      responses:
+        '200':
+          description: List of silent risks
+  /api/issues/{id}/verify:
+    post:
+      summary: Human-in-the-loop operator confirmation or field correction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                verifiedBy:
+                  type: string
+                correctedFields:
+                  type: object
+      responses:
+        '200':
+          description: Verification confirmation
+  /api/actions:
+    get:
+      summary: List operational work orders
+      responses:
+        '200':
+          description: Work orders list
+    post:
+      summary: Create a new operational work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clusterId, title, department, priority]
+      responses:
+        '201':
+          description: Created action
+  /api/actions/{id}/status:
+    patch:
+      summary: Update workflow status (NEW, UNDER_REVIEW, ASSIGNED, IN_PROGRESS, RESOLVED)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [NEW, UNDER_REVIEW, ASSIGNED, IN_PROGRESS, RESOLVED]
+      responses:
+        '200':
+          description: Updated action
+  /api/demo/seed:
+    post:
+      summary: Reset data to initial KMRL synthetic dataset
+      responses:
+        '200':
+          description: Seeding confirmation
+  /api/gemini/explain:
+    post:
+      summary: Generate deep root-cause explanation with Gemini AI
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clusterId:
+                  type: string
+      responses:
+        '200':
+          description: AI explanation

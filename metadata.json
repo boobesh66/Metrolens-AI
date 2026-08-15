@@ -1,0 +1,6 @@
+{
+  "name": "MetroLens AI",
+  "description": "Automated cross-document intelligence, recurring issue detection, and silent risk analysis for Kochi Metro Rail Limited (KMRL) operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
